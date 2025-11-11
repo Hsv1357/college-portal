@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}Faculty Dashboard - College Portal{% endblock %}
+
+{% block content %}
+<section class="dashboard">
+    <div class="container">
+        <div class="dashboard-header">
+            <h2 class="dashboard-title">Faculty Dashboard</h2>
+            <div class="user-info">
+                <div class="user-avatar">F</div>
+                <span>{{ session.name }}</span>
+                <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="stat-card">
+                <div class="stat-number faculty-stat">{{ classes_count }}</div>
+                <p>My Classes</p>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number faculty-stat">{{ students_count }}</div>
+                <p>Students</p>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number faculty-stat">{{ pending_permissions }}</div>
+                <p>Pending Permissions</p>
+            </div>
+        </div>
+
+        <div class="dashboard-section">
+            <div class="section-header">
+                <h3>Pending Permissions</h3>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Date</th>
+                        <th>Reason</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for permission in permissions %}
+                    <tr>
+                        <td>{{ permission.student_name }}</td>
+                        <td>{{ permission.date }}</td>
+                        <td>{{ permission.reason }}</td>
+                        <td class="status-{{ permission.status }}">{{ permission.status|title }}</td>
+                        <td>
+                            {% if permission.status == 'pending' %}
+                            <button class="action-btn btn-approve" data-id="{{ permission.id }}">Approve</button>
+                            <button class="action-btn btn-reject" data-id="{{ permission.id }}">Reject</button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="dashboard-section">
+            <div class="section-header">
+                <h3>My Classes</h3>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Class</th>
+                        <th>Schedule</th>
+                        <th>Room</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for class in classes %}
+                    <tr>
+                        <td>{{ class.name }}</td>
+                        <td>{{ class.schedule }}</td>
+                        <td>{{ class.room }}</td>
+                        <td>
+                            <button class="action-btn btn-edit">Take Attendance</button>
+                            <button class="action-btn btn-approve">Export</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}

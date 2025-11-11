@@ -1,0 +1,665 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - College Portal{% endblock %}
+
+{% block content %}
+<section class="dashboard">
+    <div class="container">
+        <div class="dashboard-header">
+            <h2 class="dashboard-title">Admin Dashboard</h2>
+            <div class="user-info">
+                <div class="user-avatar">A</div>
+                <span>{{ session.name }}</span>
+                <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="stat-card">
+                <div class="stat-number admin-stat">{{ students_count }}</div>
+                <p>Total Students</p>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number admin-stat">{{ faculty_count }}</div>
+                <p>Total Faculty</p>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number admin-stat">{{ pending_permissions }}</div>
+                <p>Pending Permissions</p>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number admin-stat">{{ events_count }}</div>
+                <p>Active Events</p>
+            </div>
+        </div>
+
+        <div class="dashboard-section">
+            <div class="section-header">
+                <h3>Manage Students</h3>
+                <div>
+                    <button class="btn btn-admin" id="upload-students-btn">Upload Excel</button>
+                    <button class="btn btn-admin" id="add-user-btn">Add Student</button>
+                </div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Class</th>
+                        <th>Username</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr>
+                        <td>{{ student.id }}</td>
+                        <td>{{ student.name }}</td>
+                        <td>{{ student.email or 'N/A' }}</td>
+                        <td>{{ student.class or 'N/A' }}</td>
+                        <td>{{ student.username }}</td>
+                        <td>
+                            <button class="action-btn btn-edit" onclick="editUser({{ student.id }})">Edit</button>
+                            <button class="action-btn btn-delete" onclick="deleteUser({{ student.id }}, 'student')">Delete</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="dashboard-section">
+            <div class="section-header">
+                <h3>Manage Faculty</h3>
+                <div>
+                    <button class="btn btn-admin" id="upload-faculty-btn">Upload Excel</button>
+                    <button class="btn btn-admin" id="add-faculty-btn">Add Faculty</button>
+                </div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Department</th>
+                        <th>Username</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for faculty_member in faculty %}
+                    <tr>
+                        <td>{{ faculty_member.id }}</td>
+                        <td>{{ faculty_member.name }}</td>
+                        <td>{{ faculty_member.email or 'N/A' }}</td>
+                        <td>{{ faculty_member.department or 'N/A' }}</td>
+                        <td>{{ faculty_member.username }}</td>
+                        <td>
+                            <button class="action-btn btn-edit" onclick="editUser({{ faculty_member.id }})">Edit</button>
+                            <button class="action-btn btn-delete" onclick="deleteUser({{ faculty_member.id }}, 'faculty')">Delete</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="dashboard-section">
+            <div class="section-header">
+                <h3>Manage Clubs & Events</h3>
+                <button class="btn btn-admin" id="add-club-event-btn">Add Club/Event</button>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="clubs-events-table">
+                    <!-- Will be populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- Add User Modal -->
+<div class="modal" id="add-user-modal">
+    <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h2>Add New Student</h2>
+        <form id="add-user-form">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <div class="form-group">
+                <label for="name">Full Name</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email">
+            </div>
+            <div class="form-group">
+                <label for="class">Class</label>
+                <input type="text" id="class" name="class" required>
+            </div>
+            <button type="submit" class="btn btn-admin">Add Student</button>
+        </form>
+    </div>
+</div>
+
+<!-- Upload Students Modal -->
+<div class="modal" id="upload-students-modal">
+    <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h2>Upload Students Excel</h2>
+        <form id="upload-students-form" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="students-file">Excel File</label>
+                <input type="file" id="students-file" name="file" accept=".xlsx,.xls" required>
+                <small>File should have columns: name, email, class, username, password</small>
+            </div>
+            <button type="submit" class="btn btn-admin">Upload Students</button>
+        </form>
+    </div>
+</div>
+
+<!-- Upload Faculty Modal -->
+<div class="modal" id="upload-faculty-modal">
+    <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h2>Upload Faculty Excel</h2>
+        <form id="upload-faculty-form" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="faculty-file">Excel File</label>
+                <input type="file" id="faculty-file" name="file" accept=".xlsx,.xls" required>
+                <small>File should have columns: name, email, department, username, password</small>
+            </div>
+            <button type="submit" class="btn btn-admin">Upload Faculty</button>
+        </form>
+    </div>
+</div>
+
+<!-- Add Faculty Modal -->
+<div class="modal" id="add-faculty-modal">
+    <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h2>Add New Faculty</h2>
+        <form id="add-faculty-form">
+            <div class="form-group">
+                <label for="faculty-username">Username</label>
+                <input type="text" id="faculty-username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="faculty-password">Password</label>
+                <input type="password" id="faculty-password" name="password" required>
+            </div>
+            <div class="form-group">
+                <label for="faculty-name">Full Name</label>
+                <input type="text" id="faculty-name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="faculty-email">Email</label>
+                <input type="email" id="faculty-email" name="email">
+            </div>
+            <div class="form-group">
+                <label for="faculty-department">Department</label>
+                <input type="text" id="faculty-department" name="department" required>
+            </div>
+            <button type="submit" class="btn btn-admin">Add Faculty</button>
+        </form>
+    </div>
+</div>
+
+<!-- Add Club/Event Modal -->
+<div class="modal" id="add-club-event-modal">
+    <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h2>Add Club or Event</h2>
+        <form id="add-club-event-form">
+            <div class="form-group">
+                <label for="club-event-name">Name</label>
+                <input type="text" id="club-event-name" name="name" required>
+            </div>
+            <div class="form-group">
+                <label for="club-event-type">Type</label>
+                <select id="club-event-type" name="type" required>
+                    <option value="club">Club</option>
+                    <option value="event">Event</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-admin">Add Club/Event</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Initialize when DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        initializeAdminDashboard();
+        loadClubsEvents();
+    });
+
+    function initializeAdminDashboard() {
+        // Modal functionality
+        const modals = document.querySelectorAll('.modal');
+        const closeButtons = document.querySelectorAll('.close-modal');
+        const addUserBtn = document.getElementById('add-user-btn');
+        const uploadStudentsBtn = document.getElementById('upload-students-btn');
+        const uploadFacultyBtn = document.getElementById('upload-faculty-btn');
+        const addFacultyBtn = document.getElementById('add-faculty-btn');
+        const addClubEventBtn = document.getElementById('add-club-event-btn');
+
+        // Open modals
+        if (addUserBtn) {
+            addUserBtn.addEventListener('click', function() {
+                document.getElementById('add-user-modal').style.display = 'flex';
+            });
+        }
+
+        if (uploadStudentsBtn) {
+            uploadStudentsBtn.addEventListener('click', function() {
+                document.getElementById('upload-students-modal').style.display = 'flex';
+            });
+        }
+
+        if (uploadFacultyBtn) {
+            uploadFacultyBtn.addEventListener('click', function() {
+                document.getElementById('upload-faculty-modal').style.display = 'flex';
+            });
+        }
+
+        if (addFacultyBtn) {
+            addFacultyBtn.addEventListener('click', function() {
+                document.getElementById('add-faculty-modal').style.display = 'flex';
+            });
+        }
+
+        if (addClubEventBtn) {
+            addClubEventBtn.addEventListener('click', function() {
+                document.getElementById('add-club-event-modal').style.display = 'flex';
+            });
+        }
+
+        // Close modals
+        closeButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                modals.forEach(modal => {
+                    modal.style.display = 'none';
+                });
+            });
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener('click', function(e) {
+            modals.forEach(modal => {
+                if (e.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        });
+
+        // Form submissions
+        const addUserForm = document.getElementById('add-user-form');
+        const uploadStudentsForm = document.getElementById('upload-students-form');
+        const uploadFacultyForm = document.getElementById('upload-faculty-form');
+        const addFacultyForm = document.getElementById('add-faculty-form');
+        const addClubEventForm = document.getElementById('add-club-event-form');
+
+        if (addUserForm) {
+            addUserForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                addUser();
+            });
+        }
+
+        if (uploadStudentsForm) {
+            uploadStudentsForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                uploadStudents(e);
+            });
+        }
+
+        if (uploadFacultyForm) {
+            uploadFacultyForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                uploadFaculty(e);
+            });
+        }
+
+        if (addFacultyForm) {
+            addFacultyForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                addFaculty(e);
+            });
+        }
+
+        if (addClubEventForm) {
+            addClubEventForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                addClubEvent(e);
+            });
+        }
+    }
+
+    function loadClubsEvents() {
+        fetch('/api/get_clubs_events')
+        .then(response => response.json())
+        .then(data => {
+            const table = document.getElementById('clubs-events-table');
+            if (table) {
+                table.innerHTML = '';
+                data.clubs.forEach(club => {
+                    table.innerHTML += `
+                        <tr>
+                            <td>${club.name}</td>
+                            <td>Club</td>
+                            <td>Active</td>
+                            <td>
+                                <button class="action-btn btn-edit" onclick="editClubEvent(${club.id})">Edit</button>
+                                <button class="action-btn btn-delete" onclick="deleteClubEvent(${club.id})">Delete</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                data.events.forEach(event => {
+                    table.innerHTML += `
+                        <tr>
+                            <td>${event.name}</td>
+                            <td>Event</td>
+                            <td>Active</td>
+                            <td>
+                                <button class="action-btn btn-edit" onclick="editClubEvent(${event.id})">Edit</button>
+                                <button class="action-btn btn-delete" onclick="deleteClubEvent(${event.id})">Delete</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error loading clubs and events:', error);
+        });
+    }
+
+    function deleteUser(userId, role) {
+        if (confirm(`Are you sure you want to delete this ${role}?`)) {
+            showLoading(true);
+            fetch(`/api/delete_user/${userId}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                showLoading(false);
+                if (data.success) {
+                    showNotification(`${role.charAt(0).toUpperCase() + role.slice(1)} deleted successfully`, 'success');
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    showNotification('Error: ' + data.message, 'error');
+                }
+            })
+            .catch(error => {
+                showLoading(false);
+                showNotification('An error occurred while deleting user.', 'error');
+            });
+        }
+    }
+
+    function editUser(userId) {
+        showNotification('Edit functionality would be implemented here', 'info');
+    }
+
+    function editClubEvent(id) {
+        showNotification('Edit club/event functionality would be implemented here', 'info');
+    }
+
+    function deleteClubEvent(id) {
+        if (confirm('Are you sure you want to delete this club/event?')) {
+            showNotification('Delete club/event functionality would be implemented here', 'info');
+        }
+    }
+
+    // Add new user
+    function addUser() {
+        showLoading(true);
+        
+        const form = document.getElementById('add-user-form');
+        const formData = new FormData(form);
+        const data = {
+            username: formData.get('username'),
+            password: formData.get('password'),
+            name: formData.get('name'),
+            email: formData.get('email'),
+            class: formData.get('class')
+        };
+        
+        fetch('/api/add_user', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            showLoading(false);
+            if (data.success) {
+                document.getElementById('add-user-modal').style.display = 'none';
+                form.reset();
+                showNotification('Student added successfully!', 'success');
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
+            } else {
+                showNotification('Error: ' + data.message, 'error');
+            }
+        })
+        .catch(error => {
+            showLoading(false);
+            console.error('Error:', error);
+            showNotification('An error occurred while adding student.', 'error');
+        });
+    }
+
+    // Upload students from Excel
+    function uploadStudents(e) {
+        e.preventDefault();
+        showLoading(true);
+        
+        const formData = new FormData(document.getElementById('upload-students-form'));
+        
+        fetch('/api/upload_students', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            showLoading(false);
+            if (data.success) {
+                document.getElementById('upload-students-modal').style.display = 'none';
+                document.getElementById('upload-students-form').reset();
+                showNotification(data.message, 'success');
+                setTimeout(() => location.reload(), 2000);
+            } else {
+                showNotification('Error: ' + data.message, 'error');
+            }
+        })
+        .catch(error => {
+            showLoading(false);
+            showNotification('An error occurred while uploading students.', 'error');
+        });
+    }
+
+    // Upload faculty from Excel
+    function uploadFaculty(e) {
+        e.preventDefault();
+        showLoading(true);
+        
+        const formData = new FormData(document.getElementById('upload-faculty-form'));
+        
+        fetch('/api/upload_faculty', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            showLoading(false);
+            if (data.success) {
+                document.getElementById('upload-faculty-modal').style.display = 'none';
+                document.getElementById('upload-faculty-form').reset();
+                showNotification(data.message, 'success');
+                setTimeout(() => location.reload(), 2000);
+            } else {
+                showNotification('Error: ' + data.message, 'error');
+            }
+        })
+        .catch(error => {
+            showLoading(false);
+            showNotification('An error occurred while uploading faculty.', 'error');
+        });
+    }
+
+    // Add faculty
+    function addFaculty(e) {
+        e.preventDefault();
+        showLoading(true);
+        
+        const form = document.getElementById('add-faculty-form');
+        const formData = new FormData(form);
+        const data = {
+            username: formData.get('username'),
+            password: formData.get('password'),
+            name: formData.get('name'),
+            email: formData.get('email'),
+            department: formData.get('department')
+        };
+        
+        fetch('/api/add_faculty', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            showLoading(false);
+            if (data.success) {
+                document.getElementById('add-faculty-modal').style.display = 'none';
+                form.reset();
+                showNotification(data.message, 'success');
+                setTimeout(() => location.reload(), 2000);
+            } else {
+                showNotification('Error: ' + data.message, 'error');
+            }
+        })
+        .catch(error => {
+            showLoading(false);
+            showNotification('An error occurred while adding faculty.', 'error');
+        });
+    }
+
+    // Add club/event
+    function addClubEvent(e) {
+        e.preventDefault();
+        showLoading(true);
+        
+        const form = document.getElementById('add-club-event-form');
+        const formData = new FormData(form);
+        const data = {
+            name: formData.get('name'),
+            type: formData.get('type')
+        };
+        
+        fetch('/api/add_club_event', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            showLoading(false);
+            if (data.success) {
+                document.getElementById('add-club-event-modal').style.display = 'none';
+                form.reset();
+                showNotification(data.message, 'success');
+                loadClubsEvents();
+            } else {
+                showNotification('Error: ' + data.message, 'error');
+            }
+        })
+        .catch(error => {
+            showLoading(false);
+            showNotification('An error occurred while adding club/event.', 'error');
+        });
+    }
+
+    // Show loading state
+    function showLoading(show) {
+        const buttons = document.querySelectorAll('button[type="submit"]');
+        buttons.forEach(button => {
+            if (show) {
+                button.disabled = true;
+                button.innerHTML = 'Processing...';
+                button.classList.add('loading');
+            } else {
+                button.disabled = false;
+                button.innerHTML = button.getAttribute('data-original-text') || 'Submit';
+                button.classList.remove('loading');
+            }
+        });
+    }
+
+    // Show notification
+    function showNotification(message, type = 'info') {
+        // Remove any existing notifications
+        const existingNotifications = document.querySelectorAll('.custom-notification');
+        existingNotifications.forEach(notification => notification.remove());
+
+        const notification = document.createElement('div');
+        notification.className = `custom-notification flash-message ${type}`;
+        notification.textContent = message;
+        notification.style.position = 'fixed';
+        notification.style.top = '80px';
+        notification.style.right = '20px';
+        notification.style.zIndex = '1000';
+        notification.style.maxWidth = '300px';
+        notification.style.padding = '16px 20px';
+        notification.style.borderRadius = '10px';
+        notification.style.color = 'white';
+        notification.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.08)';
+        
+        if (type === 'success') {
+            notification.style.background = '#06d6a0';
+        } else if (type === 'error') {
+            notification.style.background = '#ef476f';
+        } else {
+            notification.style.background = '#4361ee';
+        }
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.style.opacity = '0';
+            notification.style.transition = 'opacity 0.5s ease';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 500);
+        }, 5000);
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+
+{% block title %}Student Dashboard - College Portal{% endblock %}
+
+{% block content %}
+<section class="dashboard">
+    <div class="container">
+        <div class="dashboard-header">
+            <h2 class="dashboard-title">Student Dashboard</h2>
+            <div class="user-info">
+                <div class="user-avatar">S</div>
+                <span>{{ session.name }}</span>
+                <button class="btn btn-student" id="change-password-btn">Change Password</button>
+                <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
+            </div>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="stat-card">
+                <div class="stat-number student-stat">{{ "%.1f"|format(attendance_percentage) }}%</div>
+                <p>Overall Attendance</p>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number student-stat">{{ pending_permissions }}</div>
+                <p>Pending Permissions</p>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number student-stat">{{ events_count }}</div>
+                <p>Events Attending</p>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number student-stat">92%</div>
+                <p>Last Month Attendance</p>
+            </div>
+        </div>
+
+        <div class="dashboard-section">
+            <div class="section-header">
+                <h3>Apply for Permission</h3>
+                <button class="btn btn-student" id="apply-permission-btn">Apply Now</button>
+            </div>
+            <p>Submit a request for permission to be absent from class with proper documentation.</p>
+        </div>
+
+        <div class="dashboard-section">
+            <div class="section-header">
+                <h3>Attendance History</h3>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Subject</th>
+                        <th>Present</th>
+                        <th>Absent</th>
+                        <th>Percentage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for record in attendance %}
+                    <tr>
+                        <td>{{ record.name }}</td>
+                        <td>{{ record.present }}</td>
+                        <td>{{ record.absent }}</td>
+                        <td>{{ "%.1f"|format(record.percentage) }}%</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="dashboard-section">
+            <div class="section-header">
+                <h3>My Permissions</h3>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Reason</th>
+                        <th>Status</th>
+                        <th>Faculty</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for permission in permissions %}
+                    <tr>
+                        <td>{{ permission.date }}</td>
+                        <td>{{ permission.reason }}</td>
+                        <td class="status-{{ permission.status }}">{{ permission.status|title }}</td>
+                        <td>Dr. Robert Brown</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="dashboard-section">
+            <div class="section-header">
+                <h3>Events Attending</h3>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Event Name</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Venue</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for event in events_list %}
+                    <tr>
+                        <td>{{ event.name }}</td>
+                        <td>{{ event.date }}</td>
+                        <td>{{ event.time }}</td>
+                        <td>{{ event.venue }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="dashboard-section">
+            <div class="section-header">
+                <h3>Today's Classes</h3>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Subject</th>
+                        <th>Time</th>
+                        <th>Room</th>
+                        <th>Faculty</th>
+                        <th>Attendance</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Mathematics</td>
+                        <td>9:00 AM - 10:00 AM</td>
+                        <td>Room 101</td>
+                        <td>Dr. Robert Brown</td>
+                        <td class="status-approved">Present</td>
+                    </tr>
+                    <tr>
+                        <td>Physics</td>
+                        <td>11:00 AM - 12:00 PM</td>
+                        <td>Room 205</td>
+                        <td>Dr. Sarah Wilson</td>
+                        <td class="status-pending">Not Marked</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+
+<!-- Apply Permission Modal -->
+<div class="modal" id="apply-permission-modal">
+    <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h2>Apply for Permission</h2>
+        <form id="apply-permission-form">
+            <div class="form-group">
+                <label for="date">Date of Absence</label>
+                <input type="date" id="date" name="date" required>
+            </div>
+            <div class="form-group">
+                <label for="reason">Reason</label>
+                <select id="reason" name="reason" required>
+                    <option value="">Select a reason</option>
+                    <optgroup label="Clubs">
+                        {% for club in clubs %}
+                        <option value="{{ club.name }}">{{ club.name }}</option>
+                        {% endfor %}
+                    </optgroup>
+                    <optgroup label="Events">
+                        {% for event in events %}
+                        <option value="{{ event.name }}">{{ event.name }}</option>
+                        {% endfor %}
+                    </optgroup>
+                    <option value="other">Other (specify in proof)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="proof">Proof/Additional Details (Required)</label>
+                <textarea id="proof" name="proof" rows="3" placeholder="Please provide additional details or upload proof..." required></textarea>
+            </div>
+            <div class="form-group">
+                <label for="proof-file">Upload Proof (Optional)</label>
+                <input type="file" id="proof-file" name="proof_file">
+            </div>
+            <button type="submit" class="btn btn-student">Submit Request</button>
+        </form>
+    </div>
+</div>
+
+<!-- Change Password Modal -->
+<div class="modal" id="change-password-modal">
+    <div class="modal-content">
+        <span class="close-modal">&times;</span>
+        <h2>Change Password</h2>
+        <form id="change-password-form">
+            <div class="form-group">
+                <label for="current-password">Current Password</label>
+                <input type="password" id="current-password" name="current_password" required>
+            </div>
+            <div class="form-group">
+                <label for="new-password">New Password</label>
+                <input type="password" id="new-password" name="new_password" required>
+            </div>
+            <div class="form-group">
+                <label for="confirm-password">Confirm New Password</label>
+                <input type="password" id="confirm-password" name="confirm_password" required>
+            </div>
+            <button type="submit" class="btn btn-student">Change Password</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

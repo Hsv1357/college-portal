@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero" id="home">
+    <div class="hero-content">
+        <div class="hero-text">
+            <span class="hero-badge">Welcome to CollegePortal</span>
+            <h2>Streamline Academic Management with Our All-in-One Portal</h2>
+            <p>A comprehensive platform designed for students, faculty, and administrators to efficiently manage academic activities, attendance, permissions, and more.</p>
+            
+            <div class="portal-cards">
+                <div class="portal-card">
+                    <div class="portal-header admin-header">
+                        <div class="portal-icon">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                        <h3>Admin Portal</h3>
+                        <p>Complete system control and management</p>
+                    </div>
+                    <div class="portal-body">
+                        <ul>
+                            <li><i class="fas fa-check"></i> Manage Students & Faculty</li>
+                            <li><i class="fas fa-check"></i> Edit User Credentials</li>
+                            <li><i class="fas fa-check"></i> Full System Authority</li>
+                            <li><i class="fas fa-check"></i> Database Management</li>
+                        </ul>
+                        <a href="#" class="btn btn-portal btn-admin">Access Admin Portal</a>
+                    </div>
+                </div>
+                
+                <div class="portal-card">
+                    <div class="portal-header faculty-header">
+                        <div class="portal-icon">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                        </div>
+                        <h3>Faculty Portal</h3>
+                        <p>Class and attendance management</p>
+                    </div>
+                    <div class="portal-body">
+                        <ul>
+                            <li><i class="fas fa-check"></i> Take Class Attendance</li>
+                            <li><i class="fas fa-check"></i> Approve Student Permissions</li>
+                            <li><i class="fas fa-check"></i> Export Attendance to Excel</li>
+                            <li><i class="fas fa-check"></i> Manage Classes</li>
+                        </ul>
+                        <a href="#" class="btn btn-portal btn-faculty">Access Faculty Portal</a>
+                    </div>
+                </div>
+                
+                <div class="portal-card">
+                    <div class="portal-header student-header">
+                        <div class="portal-icon">
+                            <i class="fas fa-user-graduate"></i>
+                        </div>
+                        <h3>Student Portal</h3>
+                        <p>Track your academic progress</p>
+                    </div>
+                    <div class="portal-body">
+                        <ul>
+                            <li><i class="fas fa-check"></i> View Attendance Dashboard</li>
+                            <li><i class="fas fa-check"></i> Apply for Permission</li>
+                            <li><i class="fas fa-check"></i> Check Attendance Percentage</li>
+                            <li><i class="fas fa-check"></i> View Attending Events</li>
+                        </ul>
+                        <a href="#" class="btn btn-portal btn-student">Access Student Portal</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="login-card">
+            <h3>Login to Your Portal</h3>
+            <form action="{{ url_for('login') }}" method="post">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="username" name="username" placeholder="Enter your username" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="role">Login As</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-user-tag"></i>
+                        <select id="role" name="role" required>
+                            <option value="">Select Role</option>
+                            <option value="admin">Administrator</option>
+                            <option value="faculty">Faculty</option>
+                            <option value="student">Student</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-sign-in-alt"></i> Login to Portal
+                </button>
+            </form>
+            
+            <div class="demo-credentials">
+                <h4>Demo Credentials:</h4>
+                <div class="credential-item">
+                    <div class="credential-badge badge-admin">A</div>
+                    <span><strong>Admin:</strong> admin / admin123</span>
+                </div>
+                <div class="credential-item">
+                    <div class="credential-badge badge-faculty">F</div>
+                    <span><strong>Faculty:</strong> faculty1 / faculty123</span>
+                </div>
+                <div class="credential-item">
+                    <div class="credential-badge badge-student">S</div>
+                    <span><strong>Student:</strong> student1 / student123</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Portals Section -->
+<section class="portals-section">
+    <div class="section-title">
+        <h2>Three Portals, One Unified System</h2>
+        <p>Our college portal system provides specialized interfaces for each user role while maintaining a cohesive ecosystem.</p>
+    </div>
+    
+    <div class="portal-cards">
+        <!-- Cards will be the same as above -->
+    </div>
+</section>
+{% endblock %}
